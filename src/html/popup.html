@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Quick Drive</title>
+    <link rel="stylesheet" href="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+    <script src="https://netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.15/angular.min.js"></script>
+    <link rel="stylesheet" href="../style/popup.css">
+    <script src="../script/all.min.js"></script>
+    <script src="https://apis.google.com/js/client.js?onload=init"></script>
+  </head>
+
+  <body ng-app="QuickDrive" ng-csp="">
+    <div class="container" ng-controller="PopupCtrl">
+      <h1><small>{{title}}</small></h1>
+
+      <!-- メニュー -->
+      <ul class="nav nav-tabs">
+        <li role="presentation" ng-class="{ active: isActiveTab(TYPE_FAVORITE) }"><a ng-click="listItems(TYPE_FAVORITE)">{{favorite}}</a></li>
+        <li role="presentation" ng-class="{ active: isActiveTab(TYPE_RECENT) }"><a ng-click="listItems(TYPE_RECENT)">{{recent}}</a></li>
+      </ul>
+      
+      <!-- アイテムリスト -->
+      <div class="row thumbnail" ng-repeat="item in items">
+        <div class="col-xs-1">
+          <a href="{{item.alternateLink}}" target="_blank"><img class="icon" src="{{item.iconLink}}" alt="{{item.title}}" width="32" height="32"></a>
+        </div>
+        <div class="col-xs-11">
+          <h5><a href="{{item.alternateLink}}" target="_blank">{{item.title}}</a></h5>
+          <p>{{lastViewedAt}}: {{item.lastViewedByMeDate | date: dateFormat}}</p>
+        </div>
+      </div>
+      
+    </div>
+  </body>
+</html>

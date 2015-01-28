@@ -1,0 +1,16 @@
+@mixin pagesize() {
+   height: 800px;
+   width: 800px;
+}
+
+body {
+   @include pagesize();
+}
+
+img.icon {
+   margin: 20px;
+}
+
+.thumbnail {
+   margin-bottom: 0px;
+}
