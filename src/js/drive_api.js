@@ -12,7 +12,7 @@ function auth(callback) {
     'scope': [
       'https://www.googleapis.com/auth/drive'
     ],
-    'immediate': true
+    'immediate': false
   };
   gapi.auth.authorize(config, function(token) {
 //     console.log('login complete' + token);
