@@ -24,7 +24,7 @@
       "description": "last viewed at"
    },
    "dateFormat": {
-      "message": "MM/dd/yyyy",
+      "message": "M/d/yyyy",
       "description": "date format"
    }
 }
