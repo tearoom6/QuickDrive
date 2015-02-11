@@ -4,7 +4,7 @@
  * @param {Function} callback Function to call when the request is complete.
  */
 function auth(interactive, callback) {
-  if (gapi.auth.getToken() != null && gapi.client.drive.files != null) {
+  if (gapi.auth.getToken() != null && gapi.client != null && gapi.client.drive != null && gapi.client.drive.files != null) {
     callback();
     return;
   }
