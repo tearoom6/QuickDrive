@@ -2,7 +2,7 @@
    "manifest_version": 2,
    "name": "__MSG_extName__",
    "short_name": "__MSG_extShortName__",
-   "version": "1.0.3",
+   "version": "1.0.4",
    "default_locale": "en",
    "description": "__MSG_extDesc__",
    "icons": {
@@ -26,5 +26,5 @@
          "https://www.googleapis.com/auth/drive"
       ]
    },
-   "content_security_policy": "script-src 'self' https://netdna.bootstrapcdn.com https://content.googleapis.com https://ajax.googleapis.com https://apis.google.com https://accounts.google.com https://oauth.googleusercontent.com https://ssl.gstatic.com https://docs.google.com; object-src 'self'"
+   "content_security_policy": "script-src 'self' https://netdna.bootstrapcdn.com https://content.googleapis.com https://ajax.googleapis.com https://www.googleapis.com https://apis.google.com https://accounts.google.com https://oauth.googleusercontent.com https://ssl.gstatic.com https://docs.google.com; object-src 'self'"
 }
