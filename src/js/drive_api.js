@@ -1,24 +1,19 @@
 /**
  * Authenticate google user for google drive by OAuth2.
- * @param {Boolean} authenticate immideately
+ * @param {Boolean} authenticate interactively
  * @param {Function} callback Function to call when the request is complete.
  */
-function auth(immediate, callback) {
-  if (gapi.auth.getToken() != null) {
-    callback(gapi.auth.getToken());
-  	return;
+function auth(interactive, callback) {
+  if (gapi.auth.getToken() != null && gapi.client.drive.files != null) {
+    callback();
+    return;
   }
-  var config = {
-    'client_id': '739284067114-k1fs00c8nkigje81cf53rmv8vjt5hnde.apps.googleusercontent.com',
-    'scope': [
-      'https://www.googleapis.com/auth/drive'
-    ],
-    'immediate': immediate
-  };
-  gapi.auth.authorize(config, function(token) {
-//     console.log('login complete' + token);
-    gapi.client.load('drive', 'v2');
-    callback(token);
+  chrome.identity.getAuthToken({ 'interactive': interactive }, function(token) {
+    if (token == null) {
+      return;
+    }
+    gapi.auth.setToken({ 'access_token': token });
+    gapi.client.load('drive', 'v2', callback);
   });
 }
 

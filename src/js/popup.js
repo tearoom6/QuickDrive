@@ -71,5 +71,5 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
  * initialize Google API client for js
  */
 function init() {
-  auth(true, function(token) {});
+  auth(true, function() {});
 }
