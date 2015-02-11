@@ -27,10 +27,10 @@
       <!-- アイテムリスト -->
       <div class="row thumbnail" ng-repeat="item in items">
         <div class="col-xs-1">
-          <a href="{{item.alternateLink}}" target="_blank"><img class="icon" src="{{item.iconLink}}" alt="{{item.title}}" width="32" height="32"></a>
+          <a href="{{item.mimeType != 'application/vnd.google-apps.folder' ? item.alternateLink : 'https://drive.google.com/drive/#folders/' + item.id}}" target="_blank"><img class="icon" src="{{item.iconLink}}" alt="{{item.title}}" width="32" height="32"></a>
         </div>
         <div class="col-xs-11">
-          <h5><a href="{{item.alternateLink}}" target="_blank">{{item.title}}</a></h5>
+          <h5><a href="{{item.mimeType != 'application/vnd.google-apps.folder' ? item.alternateLink : 'https://drive.google.com/drive/#folders/' + item.id}}" target="_blank">{{item.title}}</a></h5>
           <p>{{lastViewedAt}}: {{item.lastViewedByMeDate | date: dateFormat}}</p>
         </div>
       </div>
