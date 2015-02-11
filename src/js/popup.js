@@ -29,7 +29,7 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   
   /* 初期化処理(1度きり実行) */
   $interval(function() {
-    auth(function() {
+    auth(true, function() {
       listLimitedFiles({'q': 'trashed = false and starred = true'}, MAX_LIST_COUNT, function(result) {
         $scope.items = orderBy(result, 'lastViewedByMeDate', true);
         $scope.$apply(); // 強制画面更新
@@ -44,7 +44,7 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   
   /* タブを押した時の処理 */
   $scope.listItems = function(type) {
-    auth(function() {
+    auth(true, function() {
       if (type == TYPE_RECENT) {
         $scope.active = TYPE_RECENT;
         var now = new Date();
@@ -71,5 +71,5 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
  * initialize Google API client for js
  */
 function init() {
-  auth(function(token) {});
+  auth(false, function(token) {});
 }

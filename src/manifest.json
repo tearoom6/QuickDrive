@@ -2,7 +2,7 @@
    "manifest_version": 2,
    "name": "__MSG_extName__",
    "short_name": "__MSG_extShortName__",
-   "version": "1.0.4",
+   "version": "1.0.5",
    "default_locale": "en",
    "description": "__MSG_extDesc__",
    "icons": {
@@ -18,7 +18,14 @@
    "permissions": [
       "identity",
       "http://www.google.com/",
-      "https://www.googleapis.com/"
+      "https://accounts.google.com/",
+      "https://www.googleapis.com/",
+      "https://content.googleapis.com/",
+      "https://ajax.googleapis.com/",
+      "https://apis.google.com/",
+      "https://oauth.googleusercontent.com/",
+      "https://ssl.gstatic.com/",
+      "https://docs.google.com/"
    ],
    "oauth2": {
       "client_id": "739284067114-k1fs00c8nkigje81cf53rmv8vjt5hnde.apps.googleusercontent.com",

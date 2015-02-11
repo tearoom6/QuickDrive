@@ -1,8 +1,9 @@
 /**
  * Authenticate google user for google drive by OAuth2.
+ * @param {Boolean} authenticate immideately
  * @param {Function} callback Function to call when the request is complete.
  */
-function auth(callback) {
+function auth(immediate, callback) {
   if (gapi.auth.getToken() != null) {
     callback(gapi.auth.getToken());
   	return;
@@ -12,7 +13,7 @@ function auth(callback) {
     'scope': [
       'https://www.googleapis.com/auth/drive'
     ],
-    'immediate': false
+    'immediate': immediate
   };
   gapi.auth.authorize(config, function(token) {
 //     console.log('login complete' + token);
