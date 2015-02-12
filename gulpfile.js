@@ -4,6 +4,7 @@ var pkg = require('./package.json');
 var minifyHTML = require('gulp-minify-html');
 var imagemin = require('gulp-imagemin');
 var concat = require('gulp-concat');
+var extend = require('gulp-extend');
 var uglify = require('gulp-uglify');
 var ngAnnotate = require('gulp-ng-annotate');
 var plumber = require('gulp-plumber');
@@ -18,6 +19,16 @@ var runSequence = require('run-sequence');
 gulp.task('config', function() {
    gulp.src('./src/**/*.json')
       .pipe(replace('{{VERSION}}', pkg.version))
+      .pipe(gulp.dest('./dist'));
+   console.log('config file copied.');
+});
+
+gulp.task('config-dev', function() {
+   gulp.src('./src/**/*.json')
+      .pipe(gulp.dest('./dist'));
+   gulp.src(['./src/manifest.json', './dev_auth_key.json'])
+      .pipe(replace('{{VERSION}}', pkg.version))
+      .pipe(extend('manifest.json'))
       .pipe(gulp.dest('./dist'));
    console.log('config file copied.');
 });
@@ -92,6 +103,15 @@ gulp.task('build', function(callback) {
    return runSequence(
       'clean',
       ['config', 'html', 'img', 'js-ng', 'sass'], // Angular.js用
+      callback
+   );
+   console.log('build successful.');
+});
+
+gulp.task('build-dev', function(callback) {
+   return runSequence(
+      'clean',
+      ['config-dev', 'html', 'img', 'js-dev', 'sass'], // Angular.js用
       callback
    );
    console.log('build successful.');
