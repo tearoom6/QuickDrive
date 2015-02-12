@@ -15,6 +15,22 @@
       "message": "Reset",
       "description": "reset auth token"
    },
+   "search": {
+      "message": "Search",
+      "description": "search"
+   },
+   "clear": {
+      "message": "Clear",
+      "description": "clear"
+   },
+   "search_text": {
+      "message": "Input search text",
+      "description": "input search text"
+   },
+   "search_result": {
+      "message": "Search",
+      "description": "search result"
+   },
    "recent": {
       "message": "Recent",
       "description": "recent items"

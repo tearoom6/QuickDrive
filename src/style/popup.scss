@@ -7,6 +7,15 @@ body {
    @include pagesize();
 }
 
+#searchForm {
+   margin-left: 20px;
+   margin-right: 10px;
+}
+
+#resetAuthBtn {
+   margin-left: 10px;
+}
+
 img.icon {
    margin: 20px;
 }

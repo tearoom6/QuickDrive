@@ -17,16 +17,35 @@
   <body ng-app="QuickDrive" ng-csp="">
     <div class="container" ng-controller="PopupCtrl">
       <h1>
-        <small>{{title}}</small>
-        <button type="button" class="btn btn-primary" ng-click="resetAuthToken()">
-          <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> {{reset}}
-        </button>
+        <form class="form-inline">
+	      <small>{{title}}</small>
+	      <!-- 検索BOX -->
+          <div class="form-group" id="searchForm">
+            <label class="sr-only" for="searchBox">Search Box</label>
+            <input type="text" class="form-control" id="searchBox" placeholder="{{search_text}}" ng-model="searchText">
+          </div>
+          <div class="btn-group">
+            <button type="button" class="btn btn-danger" ng-click="searchItems()">{{search}}</button>
+            <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+              <span class="caret"></span>
+              <span class="sr-only">Toggle Dropdown</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+              <li><a ng-click="clearSearchBox()">{{clear}}</a></li>
+            </ul>
+          </div>
+          <!-- 認証リセットボタン -->
+          <button type="button" class="btn btn-primary" id="resetAuthBtn" ng-click="resetAuthToken()">
+            <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> {{reset}}
+          </button>
+        </form>
       </h1>
 
       <!-- メニュー -->
       <ul class="nav nav-tabs">
         <li role="presentation" ng-class="{ active: isActiveTab(TYPE_FAVORITE) }"><a ng-click="listItems(TYPE_FAVORITE)">{{favorite}}</a></li>
         <li role="presentation" ng-class="{ active: isActiveTab(TYPE_RECENT) }"><a ng-click="listItems(TYPE_RECENT)">{{recent}}</a></li>
+        <li role="presentation" ng-class="{ active: isActiveTab(TYPE_SEARCH) }"><a ng-click="listItems(TYPE_SEARCH)">{{search_result}}</a></li>
       </ul>
       
       <!-- アイテムリスト -->
