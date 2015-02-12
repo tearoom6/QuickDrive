@@ -17,6 +17,7 @@
    },
    "permissions": [
       "identity",
+      "storage",
       "http://www.google.com/",
       "https://www.googleapis.com/"
    ],
