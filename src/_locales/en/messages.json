@@ -11,6 +11,10 @@
       "message": "Provides quick access to Google Drive",
       "description": "extension description"
    },
+   "reset": {
+      "message": "Reset",
+      "description": "reset auth token"
+   },
    "recent": {
       "message": "Recent",
       "description": "recent items"

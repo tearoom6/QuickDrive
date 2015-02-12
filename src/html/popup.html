@@ -16,7 +16,12 @@
 
   <body ng-app="QuickDrive" ng-csp="">
     <div class="container" ng-controller="PopupCtrl">
-      <h1><small>{{title}}</small></h1>
+      <h1>
+        <small>{{title}}</small>
+        <button type="button" class="btn btn-primary" ng-click="resetAuthToken()">
+          <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> {{reset}}
+        </button>
+      </h1>
 
       <!-- メニュー -->
       <ul class="nav nav-tabs">

@@ -18,13 +18,22 @@ function auth(interactive, callback) {
 }
 
 /**
- * sign out google account.
+ * Reset google user authentication.
+ * @param {Boolean} authenticate interactively
  */
-function signOut() {
+function resetAuth(interactive) {
   if (gapi.auth.getToken() == null) {
   	return;
   }
-  gapi.auth.signOut();
+  var token = gapi.auth.getToken();
+  chrome.identity.removeCachedAuthToken({ 'token': token.access_token }, function() {
+    chrome.identity.getAuthToken({ 'interactive': interactive }, function(token) {
+      if (token == null) {
+        return;
+      }
+      gapi.auth.setToken({ 'access_token': token });
+    });
+  });
 }
 
 /**

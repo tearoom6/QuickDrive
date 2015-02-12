@@ -14,6 +14,7 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   var orderBy = $filter('orderBy');
   // resources
   $scope.title = chrome.i18n.getMessage('extName');
+  $scope.reset = chrome.i18n.getMessage('reset');
   $scope.recent = chrome.i18n.getMessage('recent');
   $scope.favorite = chrome.i18n.getMessage('favorite');
   $scope.lastViewedAt = chrome.i18n.getMessage('lastViewedAt');
@@ -40,6 +41,11 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   /* タブの状態 */
   $scope.isActiveTab = function(type) {
     return $scope.active == type;
+  };
+  
+  /* 認証トークンのリセット */
+  $scope.resetAuthToken = function() {
+    resetAuth(false);
   };
   
   /* タブを押した時の処理 */

@@ -11,6 +11,10 @@
       "message": "Google Driveへの簡易アクセスを提供します",
       "description": "extension description"
    },
+   "reset": {
+      "message": "リセット",
+      "description": "reset auth token"
+   },
    "recent": {
       "message": "最近使用",
       "description": "recent items"
