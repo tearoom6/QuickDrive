@@ -8,6 +8,7 @@ var uglify = require('gulp-uglify');
 var ngAnnotate = require('gulp-ng-annotate');
 var plumber = require('gulp-plumber');
 var header = require('gulp-header');
+var replace = require('gulp-replace');
 var sass = require('gulp-ruby-sass');
 var minifyCSS = require('gulp-minify-css');
 var del = require('del');
@@ -16,6 +17,7 @@ var runSequence = require('run-sequence');
 
 gulp.task('config', function() {
    gulp.src('./src/**/*.json')
+      .pipe(replace('{{VERSION}}', pkg.version))
       .pipe(gulp.dest('./dist'));
    console.log('config file copied.');
 });
