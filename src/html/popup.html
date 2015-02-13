@@ -22,7 +22,7 @@
 	      <!-- 検索BOX -->
           <div class="form-group" id="searchForm">
             <label class="sr-only" for="searchBox">Search Box</label>
-            <input type="text" class="form-control" id="searchBox" placeholder="{{search_text}}" ng-model="searchText">
+            <input type="text" class="form-control" id="searchBox" placeholder="{{search_text}}" ng-model="searchText" ng-keydown="kickSearchItems($event)">
           </div>
           <div class="btn-group">
             <button type="button" class="btn btn-danger" ng-click="searchItems()">{{search}}</button>

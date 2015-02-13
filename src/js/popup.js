@@ -57,6 +57,11 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   };
   
   /* 検索BOX */
+  $scope.kickSearchItems = function(keyEvent) {
+    if (keyEvent.keyCode === 13) {
+      $scope.searchItems();
+    }
+  }
   $scope.searchItems = function() {
   	if ($scope.searchText == null || $scope.searchText == '') {
   	  return;
