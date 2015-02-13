@@ -27,6 +27,7 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   $scope.dateFormat = chrome.i18n.getMessage('dateFormat');
   // default value
   $scope.active = TYPE_FAVORITE;
+  $scope.canResetAuth = true;
   $scope.searchText = '';
   $scope.items = [];
   chrome.storage.local.get('searchText', function(items) {
@@ -61,6 +62,7 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   	  return;
   	}
   	chrome.storage.local.set({ 'searchText': $scope.searchText });
+    $scope.canResetAuth = true;
   	$scope.active = TYPE_SEARCH;
     listLimitedFiles({'q': 'trashed = false and fullText contains \'' + $scope.searchText + '\''}, MAX_LIST_COUNT, function(result) {
       $scope.items = orderBy(result, 'lastViewedByMeDate', true);
@@ -74,12 +76,20 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   };
   
   /* 認証トークンのリセット */
+  $scope.isDisabledToResetAuth = function() {
+    return !$scope.canResetAuth;
+  }
   $scope.resetAuthToken = function() {
     resetAuth(false);
+    $scope.canResetAuth = false;
+    $scope.active = TYPE_FAVORITE;
+    $scope.items = [];
+    $scope.clearSearchBox();
   };
   
   /* タブを押した時の処理 */
   $scope.listItems = function(type) {
+    $scope.canResetAuth = true;
     auth(true, function() {
       if (type == TYPE_RECENT) {
       	// 最近使用タブ

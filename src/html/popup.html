@@ -35,7 +35,7 @@
             </ul>
           </div>
           <!-- 認証リセットボタン -->
-          <button type="button" class="btn btn-primary" id="resetAuthBtn" ng-click="resetAuthToken()">
+          <button type="button" class="btn btn-primary" id="resetAuthBtn" ng-class="{ disabled: isDisabledToResetAuth() }" ng-click="resetAuthToken()">
             <span class="glyphicon glyphicon-repeat" aria-hidden="true"></span> {{reset}}
           </button>
         </form>
