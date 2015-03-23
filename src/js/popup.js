@@ -35,6 +35,11 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
       $scope.searchText = items.searchText;
     }
   });
+  chrome.storage.local.get('favoriteResult', function(items) {
+    if (items != null && items.favoriteResult != null) {
+      $scope.items = items.favoriteResult;
+    }
+  });
   
   /* 定期処理 */
   // このタイミングで表示更新もかかる
@@ -44,9 +49,11 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   /* 初期化処理(1度きり実行) */
   $interval(function() {
     auth(true, function() {
+      // スター付きリスト取得
       listLimitedFiles({'q': 'trashed = false and starred = true'}, MAX_LIST_COUNT, function(result) {
         $scope.items = orderBy(result, 'lastViewedByMeDate', true);
         $scope.$apply(); // 強制画面更新
+        chrome.storage.local.set({ 'favoriteResult' : $scope.items });
       });
     });
   }, 500, 1);
@@ -66,18 +73,18 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   	if ($scope.searchText == null || $scope.searchText == '') {
   	  return;
   	}
-  	chrome.storage.local.set({ 'searchText': $scope.searchText });
+  	chrome.storage.local.set({ 'searchText' : $scope.searchText });
     $scope.canResetAuth = true;
   	$scope.active = TYPE_SEARCH;
     listLimitedFiles({'q': 'trashed = false and fullText contains \'' + $scope.searchText + '\''}, MAX_LIST_COUNT, function(result) {
       $scope.items = orderBy(result, 'lastViewedByMeDate', true);
-      chrome.storage.local.set({ 'searchResult': $scope.items });
       $scope.$apply(); // 強制画面更新
+      chrome.storage.local.set({ 'searchResult' : $scope.items });
     });
   };
   $scope.clearSearchBox = function() {
     $scope.searchText = '';
-    chrome.storage.local.remove(['searchText', 'searchResult']);
+    chrome.storage.local.remove(['recentResult', 'favoriteResult', 'searchText', 'searchResult']);
   };
   
   /* 認証トークンのリセット */
@@ -99,21 +106,35 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
       if (type == TYPE_RECENT) {
       	// 最近使用タブ
         $scope.active = TYPE_RECENT;
-        var now = new Date();
-        now.setMonth(now.getMonth() - 1);
-//         console.log(now.toISOString());
-        listLimitedFiles({'q': 'trashed = false and lastViewedByMeDate >= \'' + now.toISOString() + '\''}, MAX_LIST_COUNT, function(result) {
-          $scope.items = orderBy(result, 'lastViewedByMeDate', true);
-//           $scope.items = orderBy(result, 'modifiedByMeDate', true);
-          $scope.$apply(); // 強制画面更新
+        chrome.storage.local.get('recentResult', function(items) {
+          if (items != null && items.recentResult != null) {
+            $scope.items = items.recentResult;
+            $scope.$apply(); // 強制画面更新
+          }
+          var now = new Date();
+          now.setMonth(now.getMonth() - 1);
+//           console.log(now.toISOString());
+          listLimitedFiles({'q': 'trashed = false and lastViewedByMeDate >= \'' + now.toISOString() + '\''}, MAX_LIST_COUNT, function(result) {
+            $scope.items = orderBy(result, 'lastViewedByMeDate', true);
+//             $scope.items = orderBy(result, 'modifiedByMeDate', true);
+            $scope.$apply(); // 強制画面更新
+            chrome.storage.local.set({ 'recentResult' : $scope.items });
+          });
         });
       } else if (type == TYPE_FAVORITE) {
       	// スター付きタブ
         $scope.active = TYPE_FAVORITE;
-        listLimitedFiles({'q': 'trashed = false and starred = true'}, MAX_LIST_COUNT, function(result) {
-          $scope.items = orderBy(result, 'lastViewedByMeDate', true);
-//           $scope.items = orderBy(result, 'modifiedByMeDate', true);
-          $scope.$apply(); // 強制画面更新
+        chrome.storage.local.get('favoriteResult', function(items) {
+          if (items != null && items.favoriteResult != null) {
+            $scope.items = items.favoriteResult;
+            $scope.$apply(); // 強制画面更新
+          }
+          listLimitedFiles({'q': 'trashed = false and starred = true'}, MAX_LIST_COUNT, function(result) {
+            $scope.items = orderBy(result, 'lastViewedByMeDate', true);
+//             $scope.items = orderBy(result, 'modifiedByMeDate', true);
+            $scope.$apply(); // 強制画面更新
+            chrome.storage.local.set({ 'favoriteResult' : $scope.items });
+          });
         });
       } else if (type == TYPE_SEARCH) {
       	// 検索結果タブ
@@ -124,11 +145,10 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
             console.log(chrome.runtime.lastError);
             return;
           }
-          if (items == null || items.searchResult == null) {
-            return;
+          if (items != null && items.searchResult != null) {
+            $scope.items = items.searchResult;
+            $scope.$apply(); // 強制画面更新
           }
-          $scope.items = items.searchResult;
-          $scope.$apply(); // 強制画面更新
         });
       }
     });
