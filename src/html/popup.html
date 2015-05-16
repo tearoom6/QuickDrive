@@ -18,8 +18,8 @@
     <div class="container" ng-controller="PopupCtrl">
       <h1>
         <form class="form-inline">
-	      <small>{{title}}</small>
-	      <!-- 検索BOX -->
+          <small><a class="none" href="https://drive.google.com/drive/my-drive" target="_blank" tabindex="-1">{{title}}</a></small>
+          <!-- 検索BOX -->
           <div class="form-group" id="searchForm">
             <label class="sr-only" for="searchBox">Search Box</label>
             <input type="text" class="form-control" id="searchBox" placeholder="{{search_text}}" ng-model="searchText" ng-keydown="kickSearchItems($event)">
