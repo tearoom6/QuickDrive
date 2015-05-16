@@ -185,9 +185,8 @@ module.controller('PopupCtrl', ['$scope', '$window', '$filter', '$interval', fun
             $scope.items = items.recentResult;
             $scope.$apply(); // 強制画面更新
           }
-          var now = new Date();
-          now.setMonth(now.getMonth() - 1);
-          $scope.retrieveItems(TYPE_RECENT, {'q': 'trashed = false and lastViewedByMeDate >= \'' + now.toISOString() + '\''}, 'lastViewedByMeDate', false);
+          // 6ヶ月前までのファイルを検索
+          $scope.retrieveItems(TYPE_RECENT, {'q': 'trashed = false and lastViewedByMeDate >= \'' + moment().subtract(6, 'months').toISOString() + '\''}, 'lastViewedByMeDate', false);
         });
       } else if (type == TYPE_FAVORITE) {
       	// スター付きタブ

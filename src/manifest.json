@@ -27,5 +27,5 @@
          "https://www.googleapis.com/auth/drive"
       ]
    },
-   "content_security_policy": "script-src 'self' https://netdna.bootstrapcdn.com https://content.googleapis.com https://ajax.googleapis.com https://www.googleapis.com https://apis.google.com https://accounts.google.com https://oauth.googleusercontent.com https://ssl.gstatic.com https://docs.google.com; object-src 'self'"
+   "content_security_policy": "script-src 'self' https://netdna.bootstrapcdn.com https://cdnjs.cloudflare.com https://content.googleapis.com https://ajax.googleapis.com https://www.googleapis.com https://apis.google.com https://accounts.google.com https://oauth.googleusercontent.com https://ssl.gstatic.com https://docs.google.com; object-src 'self'"
 }
