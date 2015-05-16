@@ -75,6 +75,6 @@ function listLimitedFiles(reqParams, limitCount, callback) {
   reqParams.maxResults = limitCount;
   var request = gapi.client.drive.files.list(reqParams);
   request.execute(function(resp) {
-    callback(resp.items);
+    callback(resp.items, resp.nextPageToken);
   });
 }

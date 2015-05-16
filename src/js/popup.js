@@ -3,12 +3,18 @@ module.config(function ($compileProvider) {
   // url whitelist
   $compileProvider.aHrefSanitizationWhitelist (/^\s*(https?|ftp|mailto|file|tel|chrome-extension):/);
 });
-module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function PopupCtrl($scope, $filter, $interval) {
+module.controller('PopupCtrl', ['$scope', '$window', '$filter', '$interval', function PopupCtrl($scope, $window, $filter, $interval) {
   // constants
   const MAX_LIST_COUNT = 20;
   const TYPE_RECENT = 'recent';
   const TYPE_FAVORITE = 'favorite';
   const TYPE_SEARCH = 'search';
+  const SAVE_KEY_RESULT_MAP = {};
+  SAVE_KEY_RESULT_MAP[TYPE_RECENT] = 'recentResult';
+  SAVE_KEY_RESULT_MAP[TYPE_FAVORITE] = 'favoriteResult';
+  SAVE_KEY_RESULT_MAP[TYPE_SEARCH] = 'searchResult';
+  const SAVE_KEY_SEARCH_TEXT = 'searchText';
+  const DEFAULT_TYPE = TYPE_FAVORITE;
   $scope.TYPE_RECENT = TYPE_RECENT;
   $scope.TYPE_FAVORITE = TYPE_FAVORITE;
   $scope.TYPE_SEARCH = TYPE_SEARCH;
@@ -26,43 +32,70 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   $scope.lastViewedAt = chrome.i18n.getMessage('lastViewedAt');
   $scope.dateFormat = chrome.i18n.getMessage('dateFormat');
   // default value
-  $scope.active = TYPE_FAVORITE;
+  $scope.active = DEFAULT_TYPE;
   $scope.canResetAuth = true;
   $scope.searchText = '';
   $scope.items = [];
-  chrome.storage.local.get('searchText', function(items) {
-    if (items != null && items.searchText != null) {
-      $scope.searchText = items.searchText;
-    }
-  });
-  chrome.storage.local.get('favoriteResult', function(items) {
-    if (items != null && items.favoriteResult != null) {
-      $scope.items = items.favoriteResult;
-    }
-  });
-  
-  /* 定期処理 */
-  // このタイミングで表示更新もかかる
-//   $interval(function () {
-//   }, 1000);
-  
-  /* 初期化処理(1度きり実行) */
-  $interval(function() {
-    auth(true, function() {
-      // スター付きリスト取得
-      listLimitedFiles({'q': 'trashed = false and starred = true'}, MAX_LIST_COUNT, function(result) {
-        $scope.items = orderBy(result, 'lastViewedByMeDate', true);
-        $scope.$apply(); // 強制画面更新
-        chrome.storage.local.set({ 'favoriteResult' : $scope.items });
-      });
-    });
-  }, 500, 1);
-  
+
   /* タブの状態 */
   $scope.isActiveTab = function(type) {
     return $scope.active == type;
   };
-  
+
+  /* 操作キャッシュ */
+  $scope.requestCache = {};
+  $scope.saveRequestCache = function(type, query, nextPageToken) {
+    $scope.requestCache[type] = {
+      'q' : query,
+      'pageToken' : nextPageToken
+    };
+  }
+  $scope.getRequestCache = function(type) {
+    return $scope.requestCache[type];
+  }
+  $scope.clearRequestCache = function(type) {
+    if (type in $scope.requestCache)
+      delete $scope.requestCache[type];
+  }
+
+  /* ローカルストレージ */
+  $scope.saveLocal = function(key, value) {
+    var storeObj = {};
+    storeObj[key] = value;
+    chrome.storage.local.set(storeObj);
+  }
+  $scope.loadLocal = function(key, callback) {
+    chrome.storage.local.get(key, callback);
+  }
+  $scope.clearLocal = function() {
+    chrome.storage.local.clear();
+  }
+
+  /* ファイル取得 */
+  $scope.retrieveItems = function(type, request, orderAttr, isAdditional) {
+    listLimitedFiles(request, MAX_LIST_COUNT, function(items, nextPageToken) {
+      if (isAdditional && !$scope.isActiveTab(type))
+        // 追加取得の場合はマージする関係上、データの不整合が起きないよう気をつける
+        return;
+      if (nextPageToken) {
+        // 残りのファイルがある場合(最終ページでない)
+        $scope.saveRequestCache(type, request.q, nextPageToken);
+      } else {
+        // すべてのファイルを取得した場合(最終ページ)
+        $scope.clearRequestCache(type);
+      }
+      if (!isAdditional) {
+        // 1ページ目取得時
+        $scope.items = orderBy(items, orderAttr, true);
+      } else {
+        // 2ページ目以降取得時
+        $scope.items = $scope.items.concat(orderBy(items, orderAttr, true));
+      }
+      $scope.$apply(); // 強制画面更新
+      $scope.saveLocal(SAVE_KEY_RESULT_MAP[type], $scope.items);
+    });
+  }
+
   /* 検索BOX */
   $scope.kickSearchItems = function(keyEvent) {
     if (keyEvent.keyCode === 13) {
@@ -73,18 +106,15 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
   	if ($scope.searchText == null || $scope.searchText == '') {
   	  return;
   	}
-  	chrome.storage.local.set({ 'searchText' : $scope.searchText });
+    $scope.saveLocal(SAVE_KEY_SEARCH_TEXT, $scope.searchText);
     $scope.canResetAuth = true;
   	$scope.active = TYPE_SEARCH;
-    listLimitedFiles({'q': 'trashed = false and fullText contains \'' + $scope.searchText + '\''}, MAX_LIST_COUNT, function(result) {
-      $scope.items = orderBy(result, 'lastViewedByMeDate', true);
-      $scope.$apply(); // 強制画面更新
-      chrome.storage.local.set({ 'searchResult' : $scope.items });
-    });
+    $scope.clearRequestCache(TYPE_SEARCH);
+    $scope.retrieveItems(TYPE_SEARCH, {'q': 'trashed = false and fullText contains \'' + $scope.searchText + '\''}, 'lastViewedByMeDate', false);
   };
   $scope.clearSearchBox = function() {
     $scope.searchText = '';
-    chrome.storage.local.remove(['recentResult', 'favoriteResult', 'searchText', 'searchResult']);
+    $scope.clearLocal();
   };
   
   /* 認証トークンのリセット */
@@ -98,7 +128,50 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
     $scope.items = [];
     $scope.clearSearchBox();
   };
-  
+
+  /* 初期データロード */
+  $scope.loadLocal(SAVE_KEY_SEARCH_TEXT, function(items) {
+    if (items != null && items.searchText != null) {
+      $scope.searchText = items.searchText;
+    }
+  });
+  $scope.loadLocal(SAVE_KEY_RESULT_MAP[DEFAULT_TYPE], function(items) {
+    if (items != null && items.favoriteResult != null) {
+      $scope.items = items.favoriteResult;
+    }
+  });
+
+  /* 定期処理 */
+  // このタイミングで表示更新もかかる
+//   $interval(function () {
+//   }, 1000);
+
+  /* 初期化処理(1度きり実行) */
+  $interval(function() {
+    // スクロール位置取得用要素のキャッシュ
+    $scope.elScrollable = document.body;
+    if (navigator.userAgent.indexOf('WebKit') < 0)
+      $scope.elScrollable = document.documentElement;
+    // ページ下端までスクロールした際のイベント登録
+    angular.element($window).bind("scroll", function() {
+      var scrollTop = $scope.elScrollable.scrollTop;
+      var windowHeight = document.documentElement.clientHeight;
+      var pageHeight = $scope.elScrollable.scrollHeight;
+      if (scrollTop + windowHeight < pageHeight)
+        // ページ下端に達していない場合は何もしない
+        return;
+      var type = $scope.active;
+      var req = $scope.getRequestCache(type);
+      if (!req)
+        return;
+      $scope.retrieveItems(type, req, 'lastViewedByMeDate', true);
+    });
+    auth(true, function() {
+      // デフォルトの表示リスト取得
+      $scope.retrieveItems(DEFAULT_TYPE, {'q': 'trashed = false and starred = true'}, 'lastViewedByMeDate', false);
+    });
+  }, 500, 1);
+
   /* タブを押した時の処理 */
   $scope.listItems = function(type) {
     $scope.canResetAuth = true;
@@ -106,41 +179,32 @@ module.controller('PopupCtrl', ['$scope', '$filter', '$interval', function Popup
       if (type == TYPE_RECENT) {
       	// 最近使用タブ
         $scope.active = TYPE_RECENT;
-        chrome.storage.local.get('recentResult', function(items) {
+        $scope.clearRequestCache(TYPE_RECENT);
+        $scope.loadLocal(SAVE_KEY_RESULT_MAP[TYPE_RECENT], function(items) {
           if (items != null && items.recentResult != null) {
             $scope.items = items.recentResult;
             $scope.$apply(); // 強制画面更新
           }
           var now = new Date();
           now.setMonth(now.getMonth() - 1);
-//           console.log(now.toISOString());
-          listLimitedFiles({'q': 'trashed = false and lastViewedByMeDate >= \'' + now.toISOString() + '\''}, MAX_LIST_COUNT, function(result) {
-            $scope.items = orderBy(result, 'lastViewedByMeDate', true);
-//             $scope.items = orderBy(result, 'modifiedByMeDate', true);
-            $scope.$apply(); // 強制画面更新
-            chrome.storage.local.set({ 'recentResult' : $scope.items });
-          });
+          $scope.retrieveItems(TYPE_RECENT, {'q': 'trashed = false and lastViewedByMeDate >= \'' + now.toISOString() + '\''}, 'lastViewedByMeDate', false);
         });
       } else if (type == TYPE_FAVORITE) {
       	// スター付きタブ
         $scope.active = TYPE_FAVORITE;
-        chrome.storage.local.get('favoriteResult', function(items) {
+        $scope.clearRequestCache(TYPE_FAVORITE);
+        $scope.loadLocal(SAVE_KEY_RESULT_MAP[TYPE_FAVORITE], function(items) {
           if (items != null && items.favoriteResult != null) {
             $scope.items = items.favoriteResult;
             $scope.$apply(); // 強制画面更新
           }
-          listLimitedFiles({'q': 'trashed = false and starred = true'}, MAX_LIST_COUNT, function(result) {
-            $scope.items = orderBy(result, 'lastViewedByMeDate', true);
-//             $scope.items = orderBy(result, 'modifiedByMeDate', true);
-            $scope.$apply(); // 強制画面更新
-            chrome.storage.local.set({ 'favoriteResult' : $scope.items });
-          });
+          $scope.retrieveItems(TYPE_FAVORITE, {'q': 'trashed = false and starred = true'}, 'lastViewedByMeDate', false);
         });
       } else if (type == TYPE_SEARCH) {
       	// 検索結果タブ
         $scope.active = TYPE_SEARCH;
         $scope.items = [];
-        chrome.storage.local.get('searchResult', function(items) {
+        $scope.loadLocal(SAVE_KEY_RESULT_MAP[TYPE_SEARCH], function(items) {
           if (chrome.runtime.lastError != null) {
             console.log(chrome.runtime.lastError);
             return;
