@@ -4,3 +4,7 @@ dist
 compiled
 node_modules
 
+# IntelliJ
+.idea/workspace.xml
+.idea/tasks.xml
+*.iws
