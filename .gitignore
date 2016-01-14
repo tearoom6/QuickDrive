@@ -3,6 +3,7 @@
 dist
 compiled
 node_modules
+dev_auth_key.json
 
 # IntelliJ
 .idea/workspace.xml
