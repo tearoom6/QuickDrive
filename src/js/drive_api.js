@@ -13,7 +13,7 @@ function auth(interactive, callback) {
       return;
     }
     gapi.auth.setToken({ 'access_token': token });
-    gapi.client.load('drive', 'v2', callback);
+    gapi.client.load('drive', 'v3', callback);
   });
 }
 
@@ -40,12 +40,12 @@ function resetAuth(interactive) {
  * Retrieve a list of File resources.
  * @param {Object} params to be sent with request. (query params)
  * @param {Function} callback Function to call when the request is complete.
- * @see https://developers.google.com/drive/v2/reference/files/list
+ * @see https://developers.google.com/drive/v3/reference/files/list
  */
 function listAllFiles(reqParams, callback) {
   var retrievePageOfFiles = function(request, result) {
     request.execute(function(resp) {
-      result = result.concat(resp.items);
+      result = result.concat(resp.files);
       var nextPageToken = resp.nextPageToken;
       if (nextPageToken) {
       	// sum up all items if response has multi-pages.
@@ -72,9 +72,9 @@ function listAllFiles(reqParams, callback) {
  */
 function listLimitedFiles(reqParams, limitCount, callback) {
   // request with limit.
-  reqParams.maxResults = limitCount;
+  reqParams.pageSize = limitCount;
   var request = gapi.client.drive.files.list(reqParams);
   request.execute(function(resp) {
-    callback(resp.items, resp.nextPageToken);
+    callback(resp.files, resp.nextPageToken);
   });
 }

@@ -6,6 +6,7 @@ module.config(function ($compileProvider) {
 module.controller('PopupCtrl', ['$scope', '$window', '$filter', '$interval', function PopupCtrl($scope, $window, $filter, $interval) {
   // constants
   const MAX_LIST_COUNT = 20;
+  const REQUEST_FIELDS = 'files(iconLink,id,kind,mimeType,name,viewedByMeTime,webContentLink,webViewLink),nextPageToken';
   const TYPE_RECENT = 'recent';
   const TYPE_FAVORITE = 'favorite';
   const TYPE_SEARCH = 'search';
@@ -44,11 +45,9 @@ module.controller('PopupCtrl', ['$scope', '$window', '$filter', '$interval', fun
 
   /* 操作キャッシュ */
   $scope.requestCache = {};
-  $scope.saveRequestCache = function(type, query, nextPageToken) {
-    $scope.requestCache[type] = {
-      'q' : query,
-      'pageToken' : nextPageToken
-    };
+  $scope.saveRequestCache = function(type, req, nextPageToken) {
+    req.pageToken = nextPageToken;
+    $scope.requestCache[type] = req;
   }
   $scope.getRequestCache = function(type) {
     return $scope.requestCache[type];
@@ -79,7 +78,7 @@ module.controller('PopupCtrl', ['$scope', '$window', '$filter', '$interval', fun
         return;
       if (nextPageToken) {
         // 残りのファイルがある場合(最終ページでない)
-        $scope.saveRequestCache(type, request.q, nextPageToken);
+        $scope.saveRequestCache(type, request, nextPageToken);
       } else {
         // すべてのファイルを取得した場合(最終ページ)
         $scope.clearRequestCache(type);
@@ -110,13 +109,13 @@ module.controller('PopupCtrl', ['$scope', '$window', '$filter', '$interval', fun
     $scope.canResetAuth = true;
   	$scope.active = TYPE_SEARCH;
     $scope.clearRequestCache(TYPE_SEARCH);
-    $scope.retrieveItems(TYPE_SEARCH, {'q': 'trashed = false and fullText contains \'' + $scope.searchText + '\''}, 'lastViewedByMeDate', false);
+    $scope.retrieveItems(TYPE_SEARCH, {'fields': REQUEST_FIELDS, 'q': 'trashed = false and fullText contains \'' + $scope.searchText + '\''}, 'viewedByMeTime', false);
   };
   $scope.clearSearchBox = function() {
     $scope.searchText = '';
     $scope.clearLocal();
   };
-  
+
   /* 認証トークンのリセット */
   $scope.isDisabledToResetAuth = function() {
     return !$scope.canResetAuth;
@@ -164,11 +163,11 @@ module.controller('PopupCtrl', ['$scope', '$window', '$filter', '$interval', fun
       var req = $scope.getRequestCache(type);
       if (!req)
         return;
-      $scope.retrieveItems(type, req, 'lastViewedByMeDate', true);
+      $scope.retrieveItems(type, req, 'viewedByMeTime', true);
     });
     auth(true, function() {
       // デフォルトの表示リスト取得
-      $scope.retrieveItems(DEFAULT_TYPE, {'q': 'trashed = false and starred = true'}, 'lastViewedByMeDate', false);
+      $scope.retrieveItems(DEFAULT_TYPE, {'fields': REQUEST_FIELDS, 'q': 'trashed = false and starred = true', 'orderBy': 'viewedByMeTime desc'}, 'viewedByMeTime', false);
     });
   }, 500, 1);
 
@@ -186,7 +185,7 @@ module.controller('PopupCtrl', ['$scope', '$window', '$filter', '$interval', fun
             $scope.$apply(); // 強制画面更新
           }
           // 6ヶ月前までのファイルを検索
-          $scope.retrieveItems(TYPE_RECENT, {'q': 'trashed = false and lastViewedByMeDate >= \'' + moment().subtract(6, 'months').toISOString() + '\''}, 'lastViewedByMeDate', false);
+          $scope.retrieveItems(TYPE_RECENT, {'fields': REQUEST_FIELDS, 'q': 'trashed = false and viewedByMeTime >= \'' + moment().subtract(6, 'months').toISOString() + '\'', 'orderBy': 'viewedByMeTime desc'}, 'viewedByMeTime', false);
         });
       } else if (type == TYPE_FAVORITE) {
       	// スター付きタブ
@@ -197,7 +196,7 @@ module.controller('PopupCtrl', ['$scope', '$window', '$filter', '$interval', fun
             $scope.items = items.favoriteResult;
             $scope.$apply(); // 強制画面更新
           }
-          $scope.retrieveItems(TYPE_FAVORITE, {'q': 'trashed = false and starred = true'}, 'lastViewedByMeDate', false);
+          $scope.retrieveItems(TYPE_FAVORITE, {'fields': REQUEST_FIELDS, 'q': 'trashed = false and starred = true', 'orderBy': 'viewedByMeTime desc'}, 'viewedByMeTime', false);
         });
       } else if (type == TYPE_SEARCH) {
       	// 検索結果タブ
