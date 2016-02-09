@@ -1,6 +1,8 @@
-# Quick Drive
+# ![icon](./src/img/icon128.png) Quick Drive
 
 Chrome extension to provide quick access to your Google Drive files.
+
+![screenshot](./screenshot.png)
 
 [Chrome Web Store](https://chrome.google.com/webstore/detail/quick-drive/aijfbconiilhjgfljolkoiaockgenpgn?utm_source=chrome-ntp-icon)
 
@@ -51,5 +53,3 @@ the project root. The file content is like below.
 ## Author
 
 [tearoom6](https://github.com/tearoom6)
-
-
